@@ -133,3 +133,78 @@ def test_shutdown(agent):
     """Test shutdown method"""
     agent.shutdown()
     assert agent.shutdown_flag is True
+
+@pytest.mark.asyncio
+async def test_url_anchor_handling(agent, mock_crawler):
+    """Test that URLs with different anchors are treated as the same page"""
+    mock_result = MockCrawlResult()
+    mock_crawler.arun.return_value = mock_result
+    
+    # Crawl URL with anchor
+    url1 = "https://example.com/page#section1"
+    await agent.crawl_page(mock_crawler, url1)
+    
+    # Attempt to crawl same URL with different anchor
+    url2 = "https://example.com/page#section2"
+    await agent.crawl_page(mock_crawler, url2)
+    
+    # Should only count as one page
+    assert agent.pages_crawled == 1
+    assert len(agent.visited_urls) == 1
+    assert "https://example.com/page" in agent.visited_urls
+
+@pytest.mark.asyncio
+async def test_domain_boundary(agent, mock_crawler):
+    """Test that the crawler respects domain boundaries"""
+    mock_result = MockCrawlResult(
+        html="""
+        <html>
+            <body>
+                <a href="https://example.com/internal">Internal Link</a>
+                <a href="https://otherdomain.com/external">External Link</a>
+            </body>
+        </html>
+        """
+    )
+    mock_crawler.arun.return_value = mock_result
+    
+    url = "https://example.com/start"
+    await agent.crawl_page(mock_crawler, url)
+    
+    # Should only have visited the start URL
+    assert len(agent.visited_urls) == 1
+    assert "https://example.com/start" in agent.visited_urls
+    assert "https://otherdomain.com/external" not in agent.visited_urls
+
+@pytest.mark.asyncio
+async def test_error_handling(agent, mock_crawler):
+    """Test handling of crawling errors"""
+    mock_result = MockCrawlResult(success=False)
+    mock_crawler.arun.return_value = mock_result
+    
+    url = "https://example.com/error-page"
+    await agent.crawl_page(mock_crawler, url)
+    
+    # Should still mark URL as visited despite error
+    assert url in agent.visited_urls
+    assert agent.pages_crawled == 1
+
+@pytest.mark.asyncio
+async def test_pdf_output(agent, tmp_path):
+    """Test PDF output format with mocked pdfkit"""
+    with patch('website_crawling_agent.agent.pdfkit') as mock_pdfkit:
+        agent.output_folder = str(tmp_path)
+        agent.output_format = "pdf"
+        
+        url = "https://example.com/test"
+        content = "Test content"
+        
+        agent.save_content(url, content)
+        
+        expected_html = "<h1>https://example.com/test</h1>\n<p>Test content</p>"
+        mock_pdfkit.from_string.assert_called_once()
+        
+        # Verify the HTML content passed to pdfkit
+        call_args = mock_pdfkit.from_string.call_args[0]
+        assert "<h1>" in call_args[0]
+        assert "Test content" in call_args[0]
