@@ -69,7 +69,7 @@ class WebsiteCrawlingAgent:
                     links = soup.find_all('a', href=True)
                     for link in links:
                         next_url = urljoin(url, link['href'])
-                        await self.crawl_page(crawler, next_url)
+                        await self.crawl_page(crawler, next_url, test_mode=test_mode)
             elif result.status_code == 404:
                 print(f"\nSkipping 404 page: {url}")
             else:
