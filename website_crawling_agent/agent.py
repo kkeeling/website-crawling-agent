@@ -36,8 +36,14 @@ class WebsiteCrawlingAgent:
         if url in self.visited_urls or not url.startswith(('http://', 'https://')):
             return
 
-        # Check domain boundary and test mode
-        if test_mode or urlparse(url).netloc != self.base_domain:
+        # Check domain boundary
+        if urlparse(url).netloc != self.base_domain:
+            return
+
+        # Check test mode
+        if test_mode:
+            self.visited_urls.add(url)
+            self.pages_crawled += 1
             return
 
         # Add to visited before processing to prevent duplicates
