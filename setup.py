@@ -5,7 +5,7 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        "crawl4ai~=1.0.0",
+        "crawl4ai>=0.3.73",
         "beautifulsoup4>=4.12.0",
         "markdown>=3.5.0",
         "pdfkit>=1.0.0",
