@@ -2,3 +2,5 @@ crawl4ai
 beautifulsoup4
 markdown
 pdfkit
+pytest
+pytest-asyncio
