@@ -36,6 +36,10 @@ class WebsiteCrawlingAgent:
         if url in self.visited_urls or not url.startswith(('http://', 'https://')):
             return
 
+        # Check domain boundary
+        if urlparse(url).netloc != self.base_domain:
+            return
+
         self.visited_urls.add(url)
         self.pages_crawled += 1
         print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
@@ -65,8 +69,7 @@ class WebsiteCrawlingAgent:
                     for link in links:
                         next_url = urljoin(url, link['href'])
                         next_url = next_url.split('#')[0]  # Remove anchor
-                        if urlparse(next_url).netloc == self.base_domain:
-                            await self.crawl_page(crawler, next_url)
+                        await self.crawl_page(crawler, next_url)
             elif result.status_code == 404:
                 print(f"\nSkipping 404 page: {url}")
             else:
