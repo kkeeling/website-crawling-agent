@@ -7,6 +7,7 @@
 - Write simple, verbose code over terse, compact, dense code.
 - Use Python for all code.
 - Write tests for all functions.
+- Run `pytest` after all changes to test for errors.
 
 ## Project Structure
 
