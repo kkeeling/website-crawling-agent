@@ -53,13 +53,6 @@ class WebsiteCrawlingAgent:
         # Process page even in test mode to ensure arun() is called
         try:
             result = await crawler.arun(url=url, extraction_strategy=extraction_strategy)
-            
-            # In test mode, return after calling arun() but before processing links
-            if test_mode:
-                return
-
-        try:
-            result = await crawler.arun(url=url, extraction_strategy=extraction_strategy)
 
             if result.success and result.status_code != 404:
                 content = result.extracted_content
