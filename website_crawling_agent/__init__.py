@@ -4,3 +4,6 @@ __version__ = "0.1.0"
 from .agent import WebsiteCrawlingAgent
 
 __all__ = ['WebsiteCrawlingAgent']
+from .agent import WebsiteCrawlingAgent
+
+__all__ = ['WebsiteCrawlingAgent']

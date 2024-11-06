@@ -196,3 +196,97 @@ class WebsiteCrawlingAgent:
     def shutdown(self):
         """Set shutdown flag to stop crawling"""
         self.shutdown_flag = True
+import os
+import json
+import pdfkit
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urljoin
+from crawl4ai import AsyncWebCrawler, LLMExtractionStrategy
+
+class WebsiteCrawlingAgent:
+    def __init__(self, start_url, output_format="markdown", max_pages=None, output_folder=None):
+        self.start_url = start_url
+        self.output_format = output_format
+        self.max_pages = max_pages
+        
+        # Set output folder to output_[domain] if not specified
+        parsed_url = urlparse(start_url)
+        self.base_domain = parsed_url.netloc
+        self.output_folder = output_folder or f"output_{self.base_domain}"
+        
+        self.pages_crawled = 0
+        self.shutdown_flag = False
+        self.visited_urls = set()
+
+        # Create output directory if it doesn't exist
+        os.makedirs(self.output_folder, exist_ok=True)
+
+    async def crawl(self):
+        """Main crawl method that initiates the crawling process"""
+        async with AsyncWebCrawler() as crawler:
+            await self.crawl_page(crawler, self.start_url)
+
+    async def crawl_page(self, crawler, url):
+        """Crawl a single page and process its content"""
+        # Remove anchor from URL
+        base_url = url.split('#')[0]
+        
+        # Skip if URL already visited or max pages reached
+        if (base_url in self.visited_urls or 
+            (self.max_pages and self.pages_crawled >= self.max_pages) or 
+            self.shutdown_flag):
+            return
+
+        # Mark as visited and increment counter
+        self.visited_urls.add(base_url)
+        self.pages_crawled += 1
+
+        # Crawl the page
+        result = await crawler.arun(
+            url,
+            extraction_strategy=LLMExtractionStrategy(
+                "Extract and summarize the main content of this page."
+            )
+        )
+
+        if not result.success or result.status_code == 404:
+            return
+
+        # Check for custom 404 pages
+        soup = BeautifulSoup(result.html, 'html.parser')
+        if soup.title and '404' in soup.title.string:
+            return
+
+        # Save the extracted content
+        self.save_content(url, result.extracted_content)
+
+    def save_content(self, url, content):
+        """Save content in the specified format"""
+        # Get filename from URL
+        filename = os.path.join(
+            self.output_folder,
+            urlparse(url).path.strip('/').replace('/', '_') or 'index'
+        )
+
+        if self.output_format == "markdown":
+            with open(f"{filename}.markdown", 'w') as f:
+                f.write(f"# {url}\n\n{content}")
+
+        elif self.output_format == "json":
+            with open(f"{filename}.json", 'w') as f:
+                json.dump({
+                    "url": url,
+                    "content": content
+                }, f, indent=2)
+
+        elif self.output_format == "txt":
+            with open(f"{filename}.txt", 'w') as f:
+                f.write(content)
+
+        elif self.output_format == "pdf":
+            html_content = f"<h1>{url}</h1>\n<p>{content}</p>"
+            pdfkit.from_string(html_content, f"{filename}.pdf")
+
+    def shutdown(self):
+        """Set shutdown flag to stop crawling"""
+        self.shutdown_flag = True
