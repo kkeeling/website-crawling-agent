@@ -66,16 +66,17 @@ class WebsiteCrawlingAgent:
 
                 self.save_content(url, content)
 
-                # In test mode, just record the URL and return
+                # Don't process links in test mode
                 if test_mode:
                     return
 
-                # Process links only if we haven't hit max pages
+                # Process links if we haven't hit max pages
                 if not self.max_pages or self.pages_crawled < self.max_pages:
                     links = soup.find_all('a', href=True)
                     for link in links:
                         next_url = urljoin(url, link['href'])
-                        await self.crawl_page(crawler, next_url, test_mode=test_mode)
+                        if next_url not in self.visited_urls:  # Only crawl unvisited URLs
+                            await self.crawl_page(crawler, next_url, test_mode=test_mode)
             elif result.status_code == 404:
                 print(f"\nSkipping 404 page: {url}")
             else:
