@@ -2,6 +2,8 @@ import pytest
 import os
 import json
 import asyncio
+import sys
+import subprocess
 from unittest.mock import Mock, patch, AsyncMock
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
