@@ -7,6 +7,7 @@ import time
 
 def install_playwright_browser(retries=3, delay=2):
     """Install Playwright browser with retries."""
+    print("Installing Playwright browser...")
     for attempt in range(retries):
         try:
             # Ensure playwright is installed first
