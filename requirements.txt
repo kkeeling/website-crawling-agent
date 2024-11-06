@@ -4,3 +4,5 @@ markdown
 pdfkit
 pytest
 pytest-asyncio
+litellm==1.51.2
+requests==2.32.3
