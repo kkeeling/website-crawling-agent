@@ -66,8 +66,12 @@ class WebsiteCrawlingAgent:
 
                 self.save_content(url, content)
 
-                # Only process links if not in test mode and haven't hit max pages
-                if not test_mode and (not self.max_pages or self.pages_crawled < self.max_pages):
+                # In test mode, just record the URL and return
+                if test_mode:
+                    return
+
+                # Process links only if we haven't hit max pages
+                if not self.max_pages or self.pages_crawled < self.max_pages:
                     links = soup.find_all('a', href=True)
                     for link in links:
                         next_url = urljoin(url, link['href'])
