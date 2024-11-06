@@ -14,15 +14,23 @@ This agent uses the crawl4ai library to crawl websites, extract important inform
 - Ignores URL anchors, treating URLs with different anchors as the same page
 - Allows user to specify the name and location of the output folder
 
-## Setup
+## Installation
 
-1. Install the required dependencies:
+You can install the package using pip:
 
+```bash
+pip install website-crawling-agent
 ```
-pip install -r requirements.txt
+
+Or for a isolated installation using pipx:
+
+```bash
+pipx install website-crawling-agent
 ```
 
-2. If you want to use PDF output, install wkhtmltopdf:
+### Additional Setup
+
+1. If you want to use PDF output, install wkhtmltopdf:
    - On macOS: `brew install wkhtmltopdf`
    - On Ubuntu: `sudo apt-get install wkhtmltopdf`
    - On Windows: Download and install from https://wkhtmltopdf.org/downloads.html
@@ -34,13 +42,23 @@ pip install -r requirements.txt
 
 ## Usage
 
-Run the script:
+Run the command:
 
-```
-python main.py
+```bash
+web-crawl URL [options]
 ```
 
-You will be prompted to enter:
+For example:
+```bash
+web-crawl https://example.com --format markdown --max-pages 10 --output-folder ./output
+```
+
+Available options:
+- `--format` or `-f`: Output format (markdown, json, pdf, or txt)
+- `--max-pages` or `-m`: Maximum number of pages to crawl
+- `--output-folder` or `-o`: Output folder path
+
+The crawler will process:
 1. The starting URL for the crawl
 2. The desired output format (markdown, json, pdf, or txt)
 3. The maximum number of pages to crawl (optional)
