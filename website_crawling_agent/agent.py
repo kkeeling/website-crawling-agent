@@ -36,19 +36,17 @@ class WebsiteCrawlingAgent:
         if url in self.visited_urls or not url.startswith(('http://', 'https://')):
             return
 
+        # Add to visited before any other checks
+        self.visited_urls.add(url)
+        self.pages_crawled += 1
+
         # Check domain boundary
         if urlparse(url).netloc != self.base_domain:
             return
 
-        # Check test mode
+        # In test mode, just record the URL without processing
         if test_mode:
-            self.visited_urls.add(url)
-            self.pages_crawled += 1
             return
-
-        # Add to visited before processing to prevent duplicates
-        self.visited_urls.add(url)
-        self.pages_crawled += 1
         print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
 
         extraction_strategy = LLMExtractionStrategy(
