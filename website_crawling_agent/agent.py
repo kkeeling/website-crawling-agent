@@ -117,16 +117,19 @@ class WebsiteCrawlingAgent:
         try:
             # Try multiple possible paths for different operating systems
             possible_paths = [
-                Path.home() / '.cache' / 'ms-playwright' / 'chromium-*',  # Linux/Mac
-                Path.home() / 'AppData' / 'Local' / 'ms-playwright' / 'chromium-*',  # Windows
-                Path('/ms-playwright') / 'chromium-*'  # Docker/CI environments
+                Path.home() / '.cache' / 'ms-playwright',  # Linux/Mac
+                Path.home() / 'AppData' / 'Local' / 'ms-playwright',  # Windows
+                Path('/ms-playwright')  # Docker/CI environments
             ]
             
             browser_exists = False
-            for path in possible_paths:
-                if list(Path().glob(str(path))):
-                    browser_exists = True
-                    break
+            for base_path in possible_paths:
+                if base_path.exists():
+                    # Look for chromium directory in the base path
+                    chromium_paths = list(base_path.glob('chromium-*'))
+                    if chromium_paths:
+                        browser_exists = True
+                        break
             
             if not browser_exists:
                 print("\nPlaywright browser (Chromium) is not installed.")
