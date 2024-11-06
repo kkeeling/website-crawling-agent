@@ -33,13 +33,14 @@ class WebsiteCrawlingAgent:
         # Remove anchor from URL
         url = url.split('#')[0]
 
-        if url in self.visited_urls or not url.startswith(('http://', 'https://')):
-            return
-
-        # Check domain boundary
+        # Check domain boundary before adding to visited
         if urlparse(url).netloc != self.base_domain:
             return
 
+        if url in self.visited_urls or not url.startswith(('http://', 'https://')):
+            return
+
+        # Add to visited before processing to prevent duplicates
         self.visited_urls.add(url)
         self.pages_crawled += 1
         print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
@@ -68,7 +69,6 @@ class WebsiteCrawlingAgent:
                     links = soup.find_all('a', href=True)
                     for link in links:
                         next_url = urljoin(url, link['href'])
-                        next_url = next_url.split('#')[0]  # Remove anchor
                         await self.crawl_page(crawler, next_url)
             elif result.status_code == 404:
                 print(f"\nSkipping 404 page: {url}")
