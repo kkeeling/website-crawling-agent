@@ -114,13 +114,44 @@ class WebsiteCrawlingAgent:
 
     def check_playwright_browser(self):
         """Check if Playwright browser is installed and provide instructions if not."""
-        # Check for browser installation by looking for the browser executable
-        chromium_path = Path.home() / '.cache' / 'ms-playwright' / 'chromium-*'
-        browser_exists = list(Path.home().glob(str(chromium_path)))
-        
-        if not browser_exists:
-            print("\nPlaywright browser (Chromium) is not installed.")
-            print("Please install it by running:")
-            print("\npython -m playwright install chromium")
-            print("\nThen try running this command again.")
+        try:
+            # Try multiple possible paths for different operating systems
+            possible_paths = [
+                Path.home() / '.cache' / 'ms-playwright' / 'chromium-*',  # Linux/Mac
+                Path.home() / 'AppData' / 'Local' / 'ms-playwright' / 'chromium-*',  # Windows
+                Path('/ms-playwright') / 'chromium-*'  # Docker/CI environments
+            ]
+            
+            browser_exists = False
+            for path in possible_paths:
+                if list(Path().glob(str(path))):
+                    browser_exists = True
+                    break
+            
+            if not browser_exists:
+                print("\nPlaywright browser (Chromium) is not installed.")
+                print("Please install it by running the following commands:")
+                print("\n1. pip install playwright")
+                print("2. python -m playwright install chromium")
+                print("\nThen try running this command again.")
+                
+                # Try to install automatically
+                try:
+                    print("\nAttempting automatic installation...")
+                    subprocess.check_call([sys.executable, '-m', 'playwright', 'install', 'chromium'])
+                    print("Successfully installed Playwright browser!")
+                    return
+                except subprocess.CalledProcessError:
+                    print("\nAutomatic installation failed. Please install manually using the commands above.")
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"\nUnexpected error during installation: {str(e)}")
+                    print("Please install manually using the commands above.")
+                    sys.exit(1)
+                    
+        except Exception as e:
+            print(f"\nError checking Playwright browser installation: {str(e)}")
+            print("Please ensure Playwright is installed correctly:")
+            print("1. pip install playwright")
+            print("2. python -m playwright install chromium")
             sys.exit(1)
