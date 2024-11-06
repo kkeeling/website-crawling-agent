@@ -52,18 +52,21 @@ class WebsiteCrawlingAgent:
                 
                 # Check if the page is a custom 404 page
                 soup = BeautifulSoup(result.html, 'html.parser')
-                if "404" in soup.title.string.lower() or "not found" in soup.title.string.lower():
+                title = soup.title.string if soup.title else ""
+                if title and ("404" in title.lower() or "not found" in title.lower()):
                     print(f"\nSkipping 404 page: {url}")
                     return
 
                 self.save_content(url, content)
 
-                links = soup.find_all('a', href=True)
-                for link in links:
-                    next_url = urljoin(url, link['href'])
-                    next_url = next_url.split('#')[0]  # Remove anchor
-                    if urlparse(next_url).netloc == self.base_domain:
-                        await self.crawl_page(crawler, next_url)
+                # Only process links if we haven't hit max pages
+                if not self.max_pages or self.pages_crawled < self.max_pages:
+                    links = soup.find_all('a', href=True)
+                    for link in links:
+                        next_url = urljoin(url, link['href'])
+                        next_url = next_url.split('#')[0]  # Remove anchor
+                        if urlparse(next_url).netloc == self.base_domain:
+                            await self.crawl_page(crawler, next_url)
             elif result.status_code == 404:
                 print(f"\nSkipping 404 page: {url}")
             else:

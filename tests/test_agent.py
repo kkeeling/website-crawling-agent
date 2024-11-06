@@ -202,9 +202,8 @@ async def test_pdf_output(agent, tmp_path):
         agent.save_content(url, content)
         
         expected_html = "<h1>https://example.com/test</h1>\n<p>Test content</p>"
-        mock_pdfkit.from_string.assert_called_once()
-        
-        # Verify the HTML content passed to pdfkit
-        call_args = mock_pdfkit.from_string.call_args[0]
-        assert "<h1>" in call_args[0]
-        assert "Test content" in call_args[0]
+        expected_output_path = os.path.join(str(tmp_path), "test.pdf")
+        mock_pdfkit.from_string.assert_called_once_with(
+            expected_html,
+            expected_output_path
+        )
