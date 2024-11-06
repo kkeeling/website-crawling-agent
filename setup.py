@@ -1,6 +1,25 @@
 from setuptools import setup, find_packages
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+import subprocess
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        develop.run(self)
+        subprocess.check_call(['playwright', 'install'])
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        subprocess.check_call(['playwright', 'install'])
 
 setup(
+    cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+    },
     name="website-crawling-agent",
     version="0.1.0",
     packages=find_packages(),
