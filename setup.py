@@ -2,30 +2,50 @@ from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
+import sys
+import time
+
+def install_playwright_browser(retries=3, delay=2):
+    """Install Playwright browser with retries."""
+    for attempt in range(retries):
+        try:
+            # Ensure playwright is installed first
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'playwright'])
+            
+            # Then install the browser
+            subprocess.check_call([sys.executable, '-m', 'playwright', 'install', 'chromium'])
+            print("Successfully installed Playwright browser (Chromium)")
+            return True
+        except subprocess.CalledProcessError as e:
+            if attempt < retries - 1:
+                print(f"Attempt {attempt + 1} failed. Retrying in {delay} seconds...")
+                time.sleep(delay)
+                delay *= 2  # Exponential backoff
+            else:
+                print("\nWarning: Failed to install Playwright browser automatically.")
+                print("Error details:")
+                print(f"Command '{' '.join(e.cmd)}' failed with exit status {e.returncode}")
+                print(f"Error output: {e.output if hasattr(e, 'output') else 'No output available'}")
+                print("\nPlease try installing manually after installation completes:")
+                print("1. pip install playwright")
+                print("2. python -m playwright install chromium")
+                return False
+        except Exception as e:
+            print(f"\nUnexpected error while installing Playwright browser: {str(e)}")
+            print("Please install manually using the steps above.")
+            return False
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
-        try:
-            # Use python -m playwright for more reliable execution
-            subprocess.check_call(['python', '-m', 'playwright', 'install', 'chromium'])
-        except subprocess.CalledProcessError as e:
-            print("Warning: Failed to install Playwright browser automatically.")
-            print("Please run 'python -m playwright install chromium' manually after installation.")
-            print(f"Error was: {e}")
+        install_playwright_browser()
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        try:
-            # Use python -m playwright for more reliable execution
-            subprocess.check_call(['python', '-m', 'playwright', 'install', 'chromium'])
-        except subprocess.CalledProcessError as e:
-            print("Warning: Failed to install Playwright browser automatically.")
-            print("Please run 'python -m playwright install chromium' manually after installation.")
-            print(f"Error was: {e}")
+        install_playwright_browser()
 
 setup(
     cmdclass={
