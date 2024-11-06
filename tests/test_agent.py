@@ -57,7 +57,7 @@ async def test_crawl_page_normal(agent, mock_crawler):
     mock_crawler.arun.return_value = mock_result
     
     url = "https://example.com/page1"
-    await agent.crawl_page(mock_crawler, url, test_mode=True)
+    await agent.crawl_page(mock_crawler, url)
     
     assert url in agent.visited_urls
     assert agent.pages_crawled == 1
