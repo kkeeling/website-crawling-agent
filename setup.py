@@ -5,10 +5,14 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        "crawl4ai",
-        "beautifulsoup4",
-        "markdown",
-        "pdfkit",
+        "crawl4ai>=1.0.0",
+        "beautifulsoup4>=4.12.0",
+        "markdown>=3.5.0",
+        "pdfkit>=1.0.0",
+        "litellm==1.51.2",
+        "requests==2.32.3",
+        "urllib3>=2.0.0",
+        "playwright>=1.40.0",
     ],
     entry_points={
         'console_scripts': [
