@@ -5,7 +5,10 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        # Add your requirements from requirements.txt here
+        "crawl4ai",
+        "beautifulsoup4",
+        "markdown",
+        "pdfkit",
     ],
     entry_points={
         'console_scripts': [
