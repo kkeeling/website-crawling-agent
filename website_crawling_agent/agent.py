@@ -1,4 +1,7 @@
 import os
+import subprocess
+import sys
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from crawl4ai import AsyncWebCrawler
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
@@ -18,6 +21,9 @@ class WebsiteCrawlingAgent:
         self.max_pages = max_pages
         self.pages_crawled = 0
         self.shutdown_flag = False
+        
+        # Check for Playwright browser installation
+        self.check_playwright_browser()
 
     async def crawl(self):
         print(f"Starting crawl from {self.start_url}")
@@ -105,3 +111,16 @@ class WebsiteCrawlingAgent:
     def shutdown(self):
         print("\nShutting down gracefully. Please wait for the current page to finish...")
         self.shutdown_flag = True
+
+    def check_playwright_browser(self):
+        """Check if Playwright browser is installed and provide instructions if not."""
+        # Check for browser installation by looking for the browser executable
+        chromium_path = Path.home() / '.cache' / 'ms-playwright' / 'chromium-*'
+        browser_exists = list(Path.home().glob(str(chromium_path)))
+        
+        if not browser_exists:
+            print("\nPlaywright browser (Chromium) is not installed.")
+            print("Please install it by running:")
+            print("\npython -m playwright install chromium")
+            print("\nThen try running this command again.")
+            sys.exit(1)
