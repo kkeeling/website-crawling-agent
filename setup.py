@@ -5,15 +5,21 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        "crawl4ai>=1.0.0",
+        "crawl4ai~=1.0.0",
         "beautifulsoup4>=4.12.0",
         "markdown>=3.5.0",
         "pdfkit>=1.0.0",
         "litellm==1.51.2",
         "requests==2.32.3",
-        "urllib3>=2.0.0",
+        "urllib3~=2.0.0",
         "playwright>=1.40.0",
     ],
+    extras_require={
+        'test': [
+            'pytest>=7.4.0',
+            'pytest-asyncio>=0.21.0'
+        ]
+    },
     entry_points={
         'console_scripts': [
             'web-crawl=website_crawling_agent.cli:main',
