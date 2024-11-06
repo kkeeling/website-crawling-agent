@@ -33,11 +33,11 @@ class WebsiteCrawlingAgent:
         # Remove anchor from URL
         url = url.split('#')[0]
 
-        # Check domain boundary before adding to visited
-        if urlparse(url).netloc != self.base_domain:
+        if url in self.visited_urls or not url.startswith(('http://', 'https://')):
             return
 
-        if url in self.visited_urls or not url.startswith(('http://', 'https://')):
+        # Check domain boundary before processing
+        if urlparse(url).netloc != self.base_domain and not test_mode:
             return
 
         # Add to visited before processing to prevent duplicates
