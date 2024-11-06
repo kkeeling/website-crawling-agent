@@ -87,7 +87,7 @@ class WebsiteCrawlingAgent:
                 json.dump({"url": url, "content": content}, f, ensure_ascii=False, indent=2)
         elif self.output_format == 'pdf':
             # For PDF, we'll first convert to HTML, then use a library like pdfkit to convert to PDF
-            html_content = markdown.markdown(f"# {url}\n\n{content}")
+            html_content = f"<h1>{url}</h1>\n<p>{content}</p>"
             pdfkit.from_string(html_content, filename)
         else:
             with open(filename, 'w', encoding='utf-8') as f:
