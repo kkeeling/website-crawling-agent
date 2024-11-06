@@ -44,6 +44,12 @@ class WebsiteCrawlingAgent:
         self.visited_urls.add(url)
         self.pages_crawled += 1
 
+        print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
+
+        extraction_strategy = LLMExtractionStrategy(
+            instruction="Extract the main content, including headings, paragraphs, and any important information. Ignore navigation menus, footers, and sidebars."
+        )
+
         # Process page even in test mode to ensure arun() is called
         try:
             result = await crawler.arun(url=url, extraction_strategy=extraction_strategy)
@@ -51,11 +57,6 @@ class WebsiteCrawlingAgent:
             # In test mode, return after calling arun() but before processing links
             if test_mode:
                 return
-        print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
-
-        extraction_strategy = LLMExtractionStrategy(
-            instruction="Extract the main content, including headings, paragraphs, and any important information. Ignore navigation menus, footers, and sidebars."
-        )
 
         try:
             result = await crawler.arun(url=url, extraction_strategy=extraction_strategy)
