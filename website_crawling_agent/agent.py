@@ -26,7 +26,7 @@ class WebsiteCrawlingAgent:
         print(f"\nCrawl completed. Output saved in {self.output_folder}")
         print(f"Total pages crawled: {self.pages_crawled}")
 
-    async def crawl_page(self, crawler, url):
+    async def crawl_page(self, crawler, url, test_mode=False):
         if self.shutdown_flag or (self.max_pages and self.pages_crawled >= self.max_pages):
             return
 
@@ -64,8 +64,8 @@ class WebsiteCrawlingAgent:
 
                 self.save_content(url, content)
 
-                # Only process links if we haven't hit max pages
-                if not self.max_pages or self.pages_crawled < self.max_pages:
+                # Only process links if not in test mode and haven't hit max pages
+                if not test_mode and (not self.max_pages or self.pages_crawled < self.max_pages):
                     links = soup.find_all('a', href=True)
                     for link in links:
                         next_url = urljoin(url, link['href'])
