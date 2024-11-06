@@ -7,13 +7,25 @@ class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
-        subprocess.check_call(['playwright', 'install'])
+        try:
+            # Use python -m playwright for more reliable execution
+            subprocess.check_call(['python', '-m', 'playwright', 'install', 'chromium'])
+        except subprocess.CalledProcessError as e:
+            print("Warning: Failed to install Playwright browser automatically.")
+            print("Please run 'python -m playwright install chromium' manually after installation.")
+            print(f"Error was: {e}")
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        subprocess.check_call(['playwright', 'install'])
+        try:
+            # Use python -m playwright for more reliable execution
+            subprocess.check_call(['python', '-m', 'playwright', 'install', 'chromium'])
+        except subprocess.CalledProcessError as e:
+            print("Warning: Failed to install Playwright browser automatically.")
+            print("Please run 'python -m playwright install chromium' manually after installation.")
+            print(f"Error was: {e}")
 
 setup(
     cmdclass={
