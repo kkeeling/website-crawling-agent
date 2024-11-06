@@ -214,10 +214,14 @@ async def test_pdf_output(agent, tmp_path):
 @patch('website_crawling_agent.agent.Path.exists')
 def test_check_playwright_browser_success(mock_path_exists, mock_check_call):
     """Test successful Playwright browser check and installation"""
-    # First check fails (browser not found), second check succeeds (after installation)
-    mock_path_exists.side_effect = [False, True]
+    # Mock all possible paths to return False initially
+    mock_path_exists.side_effect = [False] * 5  # For all 5 possible paths
+    
+    # Create agent which will trigger browser check
     agent = WebsiteCrawlingAgent("https://example.com")
-    agent.check_playwright_browser()
+    
+    # Mock successful installation
+    mock_check_call.return_value = 0
     
     # Verify installation was attempted
     mock_check_call.assert_called_once_with(
