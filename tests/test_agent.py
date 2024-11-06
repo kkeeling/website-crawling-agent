@@ -209,3 +209,51 @@ async def test_pdf_output(agent, tmp_path):
             expected_html,
             expected_output_path
         )
+
+@patch('website_crawling_agent.agent.subprocess.check_call')
+@patch('website_crawling_agent.agent.Path.exists')
+def test_check_playwright_browser_success(mock_path_exists, mock_check_call):
+    """Test successful Playwright browser check and installation"""
+    # First check fails (browser not found), second check succeeds (after installation)
+    mock_path_exists.side_effect = [False, True]
+    agent = WebsiteCrawlingAgent("https://example.com")
+    agent.check_playwright_browser()
+    
+    # Verify installation was attempted
+    mock_check_call.assert_called_once_with(
+        [sys.executable, '-m', 'playwright', 'install', 'chromium'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+
+@patch('website_crawling_agent.agent.subprocess.check_call')
+@patch('website_crawling_agent.agent.Path.exists')
+def test_check_playwright_browser_failure(mock_path_exists, mock_check_call):
+    """Test failed Playwright browser installation"""
+    mock_path_exists.return_value = False
+    mock_check_call.side_effect = subprocess.CalledProcessError(
+        1, 'command', stderr=b'Error message'
+    )
+    
+    with pytest.raises(SystemExit) as cm:
+        agent = WebsiteCrawlingAgent("https://example.com")
+    assert cm.value.code == 1
+
+@patch('website_crawling_agent.agent.Path.exists')
+def test_check_playwright_browser_unexpected_error(mock_path_exists):
+    """Test unexpected error during browser check"""
+    mock_path_exists.side_effect = Exception('Unexpected error')
+    
+    with pytest.raises(SystemExit) as cm:
+        agent = WebsiteCrawlingAgent("https://example.com")
+    assert cm.value.code == 1
+
+@patch('website_crawling_agent.agent.Path.exists')
+def test_check_playwright_browser_already_installed(mock_path_exists):
+    """Test when Playwright browser is already installed"""
+    # Simulate browser already being installed
+    mock_path_exists.return_value = True
+    
+    agent = WebsiteCrawlingAgent("https://example.com")
+    # Should not raise any exceptions
+    agent.check_playwright_browser()
