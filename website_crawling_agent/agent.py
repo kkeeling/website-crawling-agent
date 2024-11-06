@@ -36,17 +36,21 @@ class WebsiteCrawlingAgent:
         if url in self.visited_urls or not url.startswith(('http://', 'https://')):
             return
 
-        # Add to visited before any other checks
-        self.visited_urls.add(url)
-        self.pages_crawled += 1
-
-        # Check domain boundary
+        # Check domain boundary first
         if urlparse(url).netloc != self.base_domain:
             return
 
-        # In test mode, just record the URL without processing
-        if test_mode:
-            return
+        # Add to visited after domain check
+        self.visited_urls.add(url)
+        self.pages_crawled += 1
+
+        # Process page even in test mode to ensure arun() is called
+        try:
+            result = await crawler.arun(url=url, extraction_strategy=extraction_strategy)
+            
+            # In test mode, return after calling arun() but before processing links
+            if test_mode:
+                return
         print(f"\rCrawling page {self.pages_crawled}: {url}", end='', flush=True)
 
         extraction_strategy = LLMExtractionStrategy(
