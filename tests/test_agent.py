@@ -169,7 +169,7 @@ async def test_domain_boundary(agent, mock_crawler):
     mock_crawler.arun.return_value = mock_result
     
     url = "https://example.com/start"
-    await agent.crawl_page(mock_crawler, url)
+    await agent.crawl_page(mock_crawler, url, test_mode=True)
     
     # Should only have visited the start URL
     assert len(agent.visited_urls) == 1
